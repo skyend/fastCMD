@@ -1,0 +1,173 @@
+#!/usr/bin/perl
+
+use warnings;
+use strict;
+
+print "\n";
+
+my $SCRIPTNAME = 'fastCMD';
+my $version = '0.7';
+my $author = 'EnGoon (Jinwoong Han)';
+my $first = shift @ARGV;
+
+#Config apply
+my ($dbfile) = loadConfig();
+
+defined($first) or error_help();
+
+if ( $first eq "-register" ){
+	defined($ARGV[1]) or error_help();
+	
+	push @ARGV,'none'; #아래의 변수 할당에서 3번째 변수가 undef 로 할당되는걸 막기위해
+	my ($cmdkey,$command,$comment) = @ARGV;
+	
+	my $check = search_command($cmdkey);
+	error_print(2) if defined($check);
+
+	open IN , ">>" , $dbfile;
+
+	my $newLine = sprintf "\n<cmdKey>%s</cmdKey> <Command>%s</Command> <Comment>%s</Comment>",$cmdkey,$command,defined($comment)?$comment:"";
+	print IN $newLine;
+	close IN;
+
+	print "success register\n\tKey:$cmdkey => $command\n";
+
+} elsif ( $first eq "-remove" ) {
+	defined($ARGV[0]) or error_help();
+	
+	my $cmdkey = $ARGV[0];
+
+	remove_all() if $cmdkey eq '-all';
+	remove($cmdkey);
+
+} elsif ( $first eq "-list" ) {
+#	print "Show ( 'FullCommand' : comKey ) table\n";
+	showList();
+} else {
+	if($first =~ /^-.*/) { error_help(); }
+	
+	$_ = search_command($first);
+
+	error_print(1) unless defined($_);
+	
+	exec_cmd($_);
+}
+
+print "\n";
+
+########################
+# 함수 영역
+#
+
+sub exec_cmd {
+	my $cmd = shift @_;
+	print "--------------\nExecute > $cmd \n--------------\n";
+	my $result = `$cmd`;
+	print $result  unless $cmd =~ /^(vim|vi) .*/ and defined($result);
+}
+
+sub showList {
+	$ARGV[0] = $dbfile;
+	
+	my $line_count = 0;
+	for(<>) {
+		if (/<cmdKey>(.*?)<\/cmdKey> <Command>(.*?)<\/Command> <Comment>(.*?)<\/Comment>/) {
+			printf "\nKEY : $1\n\t\$ $2\n\tComment: %s\n",defined($3)?$3:"";
+			$line_count ++;
+		}
+	}
+	print "등록된 명령단축키가 없습니다.\n" if $line_count == 0;
+}
+
+sub search_command {
+	my $cmdkey = shift;
+	open DB,"<", $dbfile;
+
+	my $searched_command = undef;
+	
+	for(<DB>){
+		if( /<cmdKey>$cmdkey<\/cmdKey> <Command>(.*?)<\/Command>/ ){
+			$searched_command = $1;
+			last;
+		}
+	}
+	
+	close DB;
+
+	if(defined($searched_command)){
+		return $searched_command;
+	}else {
+		return undef;
+	}
+}
+
+sub remove_all {
+	print "정말 모든 DB를 삭제 하시겠습니까? (y or n) :";
+	if(<STDIN> eq "y\n"){
+		open DB ,'>' ,$dbfile;
+		print DB "";
+		close DB;
+
+		print "삭제되었습니다.\n";
+		exit;
+	}
+}
+
+sub remove {
+	my $cmdkey = shift;
+	
+	print "명령어단축키 $cmdkey 를 제거 하시겠습니까? (y or n) :";
+	return 0 if <STDIN> =~ /n/;
+
+	my $db = `cat $dbfile`;
+
+	$db =~ s/<cmdKey>$cmdkey<\/cmdKey>.*\n*//;
+	
+	open MODIFY , '>' ,$dbfile;
+	if(print MODIFY $db){
+		print "제거되었습니다.\n";
+	}else {
+		print "적용실패.\n";
+	}
+	close MODIFY;
+}
+
+sub loadConfig {
+	my $DBFILE_PATH;
+	
+	open CONFIG , '<' , "/usr/local/fastCMD/config/fastCMD.config";
+
+	for(<CONFIG>){
+		if (/DBFILE (.*?);/){
+			$DBFILE_PATH = $1;
+		}
+	}
+	
+	close CONFIG;
+
+	return ($DBFILE_PATH);
+}
+
+sub error_print {
+	my $error_num = shift;
+
+	print "ERROR:\n\t명령을 찾지 못했습니다. \n\t사용하실 명령을 등록해 주세요.\n\n" if $error_num == 1 ;
+	print "ERROR:\n\t같은 이름의 키가 이미 등록이 되어있습니다.\n\t다른이름의 키를 입력해 주세요.\n\n" if $error_num == 2 ;
+
+	error_help();
+}
+
+sub error_help {
+	print "**********************************\n";
+	print "* $SCRIPTNAME \n";
+	print "* version : $version\n";
+	print "* author  : $author\n";
+	print "----------------------------------\n";
+	print "using :\n";
+    print "\t-register cmdKey 'FullCommand' (|'Comment')\n";
+	print "\t  : vim,vi,cd 명령어 사용불가능\n";
+	print "\t-remove (-all|cmdKey)\n";
+	print "\t-list\n";
+	print "\t(cmdKey)\n\n";
+	exit;
+}
