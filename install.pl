@@ -3,6 +3,9 @@
 use warnings;
 use strict;
 
+# default : f | origin : fastCMD
+my $shell_command_name = "f"; # shorten command
+
 my $install_path = "/usr/local"; # ! don't modify
 my $fastCMD_path = "$install_path/fastCMD";
 
@@ -17,7 +20,7 @@ push @steps, "touch $fastCMD_path/db/one.dat";
 push @steps, "chmod 770 $fastCMD_path/db/one.dat";
 push @steps, "chown :users $fastCMD_path/db/one.dat";
 push @steps, "cp config/fastCMD.config $fastCMD_path/config/fastCMD.config";
-push @steps, "ln -s $fastCMD_path/bin/fastCMD /usr/bin/fastCMD";
+push @steps, "ln -s $fastCMD_path/bin/fastCMD /usr/bin/$shell_command_name";
 
 print "\n";
 for(@steps){
