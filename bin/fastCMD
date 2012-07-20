@@ -15,7 +15,7 @@ my ($dbfile) = loadConfig();
 
 defined($first) or error_help();
 
-if ( $first eq "-register" ){
+if ( $first =~/^-(r|-register)$/ ){
 	defined($ARGV[1]) or error_help();
 	
 	push @ARGV,'none'; #아래의 변수 할당에서 3번째 변수가 undef 로 할당되는걸 막기위해
@@ -32,7 +32,7 @@ if ( $first eq "-register" ){
 
 	print "success register\n\tKey:$cmdkey => $command\n";
 
-} elsif ( $first eq "-remove" ) {
+} elsif ( $first =~ /^-(d|-remove)$/ ) {
 	defined($ARGV[0]) or error_help();
 	
 	my $cmdkey = $ARGV[0];
@@ -40,7 +40,7 @@ if ( $first eq "-register" ){
 	remove_all() if $cmdkey eq '-all';
 	remove($cmdkey);
 
-} elsif ( $first eq "-list" ) {
+} elsif ( $first =~ /^-(l|-list)$/ ) {
 #	print "Show ( 'FullCommand' : comKey ) table\n";
 	showList();
 } else {
@@ -164,10 +164,10 @@ sub error_help {
 	print "* author  : $author\n";
 	print "----------------------------------\n";
 	print "using :\n";
-    print "\t-register cmdKey 'FullCommand' (|'Comment')\n";
-	print "\t  : vim,vi,cd 명령어 사용불가능\n";
-	print "\t-remove (-all|cmdKey)\n";
-	print "\t-list\n";
+    print "\t-r --register cmdKey 'FullCommand' (|'Comment')\n";
+	print "\t\t  : vim,vi,cd 명령어 사용불가능\n";
+	print "\t-d --remove (-all|cmdKey)\n";
+	print "\t-l --list\n";
 	print "\t(cmdKey)\n\n";
 	exit;
 }
