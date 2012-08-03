@@ -16,7 +16,7 @@ push @steps, "mkdir $fastCMD_path/db";
 push @steps, "mkdir $fastCMD_path/config";
 
 push @steps, "cp bin/fastCMD $fastCMD_path/bin/fastCMD";
-push @steps, "touch $fastCMD_path/db/one.dat";
+push @steps, "ls $fastCMD_path/db/one.dat | grep one.dat || touch $fastCMD_path/db/one.dat";
 push @steps, "chmod 770 $fastCMD_path/db/one.dat";
 push @steps, "chown :users $fastCMD_path/db/one.dat";
 push @steps, "cp config/fastCMD.config $fastCMD_path/config/fastCMD.config";
