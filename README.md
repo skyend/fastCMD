@@ -15,7 +15,7 @@
 ## ex ) ##
 
 
-	$ f -register oymstart '/home/www/oymkr/script/oymkr_fastcgi.pl -l /home/www/oymkr/oymkr.socket -d' 'oym fcgi 서버 띄우기'
+	$ f -r oymstart '/home/www/oymkr/script/oymkr_fastcgi.pl -l /home/www/oymkr/oymkr.socket -d' 'oym fcgi 서버 띄우기'
 
 	$ f oymstart
 
