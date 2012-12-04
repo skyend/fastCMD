@@ -2,12 +2,13 @@
 
 use warnings;
 use strict;
+use 5.010;
 
 print "\n";
 
 my $SCRIPTNAME = 'fastCMD';
-my $version = '0.7';
-my $author = 'EnGoon (Jinwoong Han)';
+our $version = eval {'0.7'};
+my $author = 'Skyend (Jinwoong Han)';
 my $first = shift @ARGV;
 
 #Config apply
@@ -63,7 +64,11 @@ sub exec_cmd {
 	my $cmd = shift @_;
 	print "--------------\nExecute > $cmd \n--------------\n";
 	my $result = `$cmd`;
-	print $result  unless $cmd =~ /^(vim|vi) .*/ and defined($result);
+
+	exec "$cmd";
+	say "can't execute \'$cmd\'";
+
+#	print $result  unless $cmd =~ /^(vim|vi) .*/ and defined($result);
 }
 
 sub showList {
@@ -164,8 +169,8 @@ sub error_help {
 	print "* author  : $author\n";
 	print "----------------------------------\n";
 	print "using :\n";
-    print "\t-r --register cmdKey 'FullCommand' (|'Comment')\n";
-	print "\t\t  : vim,vi,cd 명령어 사용불가능\n";
+	print "\t-r --register cmdKey 'FullCommand' (|'Comment')\n";
+#	print "\t\t  : vim,vi,cd 명령어 사용불가능\n";
 	print "\t-d --remove (-all|cmdKey)\n";
 	print "\t-l --list\n";
 	print "\t(cmdKey)\n\n";
